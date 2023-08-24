@@ -1,0 +1,9 @@
+.vs/
+bin/
+obj/
+appsettings.json
+NightMovie.BDD/NightMovieBdd.db
+NightMovie.BDD/NightP.db
+Properties/
+NightMovie.API/NightMovie.API/Data/NightMovieBdd.db
+NightMovie.API/NightMovie.API/Data/NightMovieBdd-log.db
