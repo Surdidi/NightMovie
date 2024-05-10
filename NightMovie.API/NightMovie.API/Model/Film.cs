@@ -9,7 +9,7 @@ namespace NightMovie.API.Model
     {
         public int Id { get; set; }
         public string? Nom { get; set; }
-        public string? ImdbId { get; set; }
+        public int? TmdbId { get; set; }
 
         [BsonRef("Categorie")]
         public Categorie? Categorie { get; set; }

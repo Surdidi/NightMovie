@@ -16,5 +16,7 @@ namespace NightMovie.API.Model
         public bool IsAdmin { get; set; } = false;
         public string? UrlProfilPicture { get;set; }
 
+        public float Weight { get; set; } = 1;
+
     }
 }

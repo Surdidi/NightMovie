@@ -13,8 +13,20 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options => options
+        .AddPolicy("CorsPolicy",
+            policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader())); 
+/*builder.Services.AddCors(options => options
+        .AddPolicy("CorsPolicy",
+            policyBuilder => policyBuilder.WithOrigins("http://localhost:8100").AllowAnyMethod().AllowAnyHeader()
+                .AllowCredentials()));
+builder.Services.AddCors(options => options
+        .AddPolicy("CorsPolicy",
+            policyBuilder => policyBuilder.WithOrigins("http://192.168.1.52:8100").AllowAnyMethod().AllowAnyHeader()
+                .AllowCredentials()));*/
 builder.Services.AddSingleton<ILiteDatabase>(new LiteDatabase("Data/NightMovieBdd.db"));
 builder.Services.AddSingleton<IAuthentificationService, AuthenficationService>();
+builder.Services.AddSingleton<ISeanceService, SeanceService>();
 
 string strKey = builder.Configuration.GetValue<string>("Authentification:SignatureKey") ?? throw new InvalidOperationException();
 var TokenValidationParameters = new TokenValidationParameters
@@ -63,15 +75,15 @@ builder.Services.AddSwaggerGen(c =>
         });
 });
 
+builder.WebHost.UseUrls("http://192.168.1.44:44369");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-
-
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

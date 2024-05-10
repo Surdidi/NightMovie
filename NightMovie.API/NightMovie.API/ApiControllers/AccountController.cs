@@ -42,5 +42,11 @@ namespace NightMovie.API.ApiControllers
             ILiteCollection<User> col = liteDb.GetCollection<User>();
             return col.FindById(id);
         }
+
+        [HttpGet]
+        public IEnumerable<User> GetAll()
+        {
+            return liteDb.GetCollection<User>().FindAll();
+        }
     }
 }

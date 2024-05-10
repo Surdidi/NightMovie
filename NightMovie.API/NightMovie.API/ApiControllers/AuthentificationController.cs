@@ -1,6 +1,7 @@
 ﻿using LiteDB;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NightMovie.API.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
 using System.Xml.Linq;
@@ -25,11 +26,11 @@ namespace NightMovie.API.ApiControllers
 
         // POST api/<FilmController>
         [HttpPost]
-        public string Login(string username, string password)
+        public string Login([FromBody] LoginOrCreateDTO login)
         {
             ILiteCollection<User> col = liteDb.GetCollection<User>();
-            var user = col.Find(x => x.UserName == username).First();
-            authenficationService.ComparePassword(user, password);
+            var user = col.Find(x => x.UserName.ToUpper() == login.Username.ToUpper()).First();
+            authenficationService.ComparePassword(user, login.Password);
             return authenficationService.GenerateJsonWebToken(user);
         }        
         

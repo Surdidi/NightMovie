@@ -44,19 +44,49 @@ namespace NightMovie.API.ApiControllers
 
         // POST api/<FilmController>
         [HttpPost]
-        public void Post([FromBody] FilmDTO value)
+        public IActionResult Post([FromBody] FilmDTO value)
         {
             ILiteCollection<Film> col = liteDb.GetCollection<Film>();
             ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
             var categ = categories.FindById(value.IdCategorie);
+
+            string userId = Utils.Utils.GetPayloadFromToken(HttpContext, "userId");
+            var userRequest = liteDb.GetCollection<User>().Find(x => x.Id == Int32.Parse(userId)).First();
+            if(value.IdCategorie == null)
+            {
+                return BadRequest(new { message = "La catégorie est obligatoire." });
+            }
+            if (col.Exists(x => x.TmdbId == value.TmdbId))
+            {
+                return Conflict(new { message = "Le film a déjà été ajouté par vous ou un autre utilisateur." });
+
+            }
+            if (col.Find(x => x.Categorie.Id == value.IdCategorie && x.User == userRequest && x.Seance == null).Count() >= categ.nbMaxByPerson)
+            {
+                return StatusCode(403, new { message = "Vous avez dépassé votre quota de films pour cette catégorie." });
+            }
+
             var film = new Film
             {
                 Nom = value.Nom,
-                ImdbId = value.ImdbId,
-                Categorie = categ
+                TmdbId = value.TmdbId,
+                Categorie = categ,
+                User = userRequest
             };
-            col.Upsert(film);
-            categ.Films.Add(film);
+            col.Insert(film);
+            if(categ.Films != null)
+            {
+                categ.Films.Add(film);
+            }
+            else
+            {
+                categ.Films = new List<Film>
+                {
+                    film
+                };
+            }
+            categories.Upsert(categ);
+            return Ok();
         }
 
         // DELETE api/<FilmController>/5

@@ -1,4 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using LiteDB;
+using NightMovie.API.Model;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace NightMovie.API.Utils
 {
@@ -20,6 +22,5 @@ namespace NightMovie.API.Utils
             int index = rand.Next(0, enumerable.Count());
             return enumerable.ElementAt(index);
         }
-
     }
 }

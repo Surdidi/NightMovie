@@ -23,18 +23,28 @@ namespace NightMovie.API.ApiControllers
         }
 
         // GET: api/<FilmController>
-        [HttpGet("/api/Categorie/Film/{id}")]
-        public IEnumerable<Film> Categories(int id)
+        [HttpPost("/api/Categorie/Films")]
+        public IEnumerable<Film> FilmsByCategories([FromBody] List<int> ids)
         {
-            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
-            return categories.FindById(id).Films;
+            ILiteCollection<Film> categories = liteDb.GetCollection<Film>();
+            var listCategories = categories.Find(x => ids.Contains(x.Categorie.Id));
+
+            return listCategories;
         }
 
-        [HttpPost("/api/Categorie/Film/{id}")]
+        [HttpPost("/api/Categorie")]
         public void Post(Categorie categorie)
         {
             ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
             categories.Upsert(categorie);
+        }
+
+
+        [HttpGet("/api/Categorie")]
+        public IEnumerable<Categorie> Categories()
+        {
+            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
+            return categories.FindAll();
         }
     }
 
