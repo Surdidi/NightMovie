@@ -15,7 +15,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => options
         .AddPolicy("AllowAllOrigins",
-            policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader())); 
+            policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+builder.Services.AddCors(options => options.AddPolicy("ApiCorsPolicy", builder =>
+{
+    builder.WithOrigins("http://192.168.1.44:8100").AllowAnyMethod().AllowAnyHeader();
+}));
 
 builder.Services.AddSingleton<ILiteDatabase>(new LiteDatabase("Data/NightMovieBdd.db"));
 builder.Services.AddSingleton<IAuthentificationService, AuthenficationService>();
@@ -69,17 +73,17 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+app.UseCors("ApiCorsPolicy");
 
 // Configure the HTTP request pipeline.
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-
+//app.MapControllers();
+app.UseEndpoints(app => app.MapControllers());
 app.Run();
