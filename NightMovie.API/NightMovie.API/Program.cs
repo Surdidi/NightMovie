@@ -74,7 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-/*app.Use(async (context, next) =>
+app.Use(async (context, next) =>
 {
     if (context.Request.Method == "OPTIONS")
     {
@@ -85,7 +85,7 @@ var app = builder.Build();
         return;
     }
     await next();
-});*/
+});
 
 // Configure the HTTP request pipeline.
 app.UseRouting();
