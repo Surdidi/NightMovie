@@ -10,12 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => options
         .AddPolicy("AllowAllOrigins",
             policyBuilder => policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => options.AddPolicy("ApiCorsPolicy", builder =>
 {
     builder.WithOrigins("http://192.168.1.44:8100").AllowAnyMethod().AllowAnyHeader();
@@ -73,17 +74,31 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-app.UseCors("ApiCorsPolicy");
+/*app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", new[] { (string)context.Request.Headers["Origin"] });
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        context.Response.StatusCode = 200;
+        return;
+    }
+    await next();
+});*/
 
 // Configure the HTTP request pipeline.
-
+app.UseRouting();
+app.UseCors("ApiCorsPolicy");
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 //app.MapControllers();
-app.UseEndpoints(app => app.MapControllers());
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 app.Run();

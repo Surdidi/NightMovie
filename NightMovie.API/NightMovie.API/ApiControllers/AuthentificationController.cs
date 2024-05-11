@@ -1,4 +1,5 @@
 ﻿using LiteDB;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NightMovie.API.DTO;
@@ -26,6 +27,7 @@ namespace NightMovie.API.ApiControllers
 
         // POST api/<FilmController>
         [HttpPost]
+        [EnableCors("ApiCorsPolicy")]
         public string Login([FromBody] LoginOrCreateDTO login)
         {
             ILiteCollection<User> col = liteDb.GetCollection<User>();
