@@ -75,8 +75,6 @@ builder.Services.AddSwaggerGen(c =>
         });
 });
 
-builder.WebHost.UseUrls("http://192.168.1.44:44369");
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
