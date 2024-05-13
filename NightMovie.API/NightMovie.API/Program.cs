@@ -19,7 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => options.AddPolicy("ApiCorsPolicy", builder =>
 {
-    builder.WithOrigins("http://192.168.1.44:8100").AllowAnyMethod().AllowAnyHeader();
+    builder.WithOrigins("http://192.168.1.44:8100", "http://88.172.131.125:17004").AllowAnyMethod().AllowAnyHeader();
 }));
 
 builder.Services.AddSingleton<ILiteDatabase>(new LiteDatabase("Data/NightMovieBdd.db"));
