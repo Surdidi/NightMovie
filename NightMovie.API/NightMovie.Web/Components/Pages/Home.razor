@@ -1,7 +1,78 @@
-﻿@page "/"
+﻿@page "/home"
+@using Microsoft.AspNetCore.Components
 
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NightMovie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .grid div {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .footer button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NIGHTMOVIE</h1>
+            <input type="text" placeholder="Rechercher" class="search-bar" />
+        </div>
+        <div class="grid">
+            @for (int i = 0; i < 16; i++)
+            {
+                <div></div>
+            }
+        </div>
+        <div class="footer">
+            <button>AJOUTER UN FILM</button>
+            <button>SESSIONS</button>
+            <button>Filtres</button>
+        </div>
+    </div>
+</body>
+</html>

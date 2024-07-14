@@ -1,10 +1,13 @@
+using NightMovie.API.Services;
 using NightMovie.Web.Components;
+using NightMovie.Web.Services.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddHttpClient<ITMDBService, TMDBService>();
 
 var app = builder.Build();
 
