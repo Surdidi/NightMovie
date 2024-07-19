@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NightMovie.API", "NightMovi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NightMovie.Web", "NightMovie.Web\NightMovie.Web.csproj", "{968AA313-2F55-4D61-A5DE-BBD06EF40CF8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NightMovie.Model", "NightMovie.Model\NightMovie.Model.csproj", "{526C8E11-E58D-44EC-8E54-58DE6EA753B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{968AA313-2F55-4D61-A5DE-BBD06EF40CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{968AA313-2F55-4D61-A5DE-BBD06EF40CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{968AA313-2F55-4D61-A5DE-BBD06EF40CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{526C8E11-E58D-44EC-8E54-58DE6EA753B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{526C8E11-E58D-44EC-8E54-58DE6EA753B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{526C8E11-E58D-44EC-8E54-58DE6EA753B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{526C8E11-E58D-44EC-8E54-58DE6EA753B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

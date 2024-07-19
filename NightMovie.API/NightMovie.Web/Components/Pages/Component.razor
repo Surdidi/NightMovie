@@ -1,0 +1,53 @@
+﻿@page "/AddMovie"
+@using NightMovie.Web.Models
+<h3>Component</h3>
+
+<div class="search-bar">
+    <input type="text" placeholder="Rechercher" @oninput="OnSearchChanged" />
+</div>
+
+<div>
+    <ul>
+        @if (searchResults != null && searchResults.Any())
+        {
+            @foreach (var movie in searchResults)
+            {
+                <li @onclick="() => SelectMovie(movie)">
+                    @movie.Title (@movie.Title)
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    private string searchTerm;
+    private List<Movie> searchResults = new List<Movie>();
+    private Movie selectedMovie;
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        Console.WriteLine("HELLO");
+        searchTerm = e.Value.ToString();
+        //searchResults = await Tmdb.SearchMovieByNameAsync(searchTerm);
+    }
+
+    private void SelectMovie(Movie movie)
+    {
+        selectedMovie = movie;
+    }
+
+    private void AddAMovie()
+    {
+        if (selectedMovie != null)
+        {
+            // Ajouter le film à la liste (à implémenter selon votre logique d'application)
+            Console.WriteLine($"Film ajouté: {selectedMovie.Title}");
+            // Réinitialiser les valeurs après l'ajout
+            selectedMovie = null;
+            searchTerm = string.Empty;
+            searchResults.Clear();
+        }
+    }
+
+}

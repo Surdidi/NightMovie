@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddHttpClient<ITMDBService, TMDBService>();
+builder.Services.AddSingleton<ITMDBService, TMDBService>();
 
 var app = builder.Build();
 

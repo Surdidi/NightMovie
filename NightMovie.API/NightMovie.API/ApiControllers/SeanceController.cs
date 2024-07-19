@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.API.DTO;
+using NightMovie.Model.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
 using NightMovie.API.Utils;

@@ -1,4 +1,4 @@
-﻿namespace NightMovie.API.DTO
+﻿namespace NightMovie.Model.DTO
 {
     public class LoginOrCreateDTO
     {

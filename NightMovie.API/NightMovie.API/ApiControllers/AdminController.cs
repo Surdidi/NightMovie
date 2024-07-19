@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.API.DTO;
+using NightMovie.Model.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
 
@@ -51,8 +51,8 @@ namespace NightMovie.API.ApiControllers
         }
 
 
-        /*[HttpPost]
-        public void CreateUserTmp(LoginOrCreateDTO userToAdd)
+        [HttpPost]
+        /*public void CreateUserTmp(LoginOrCreateDTO userToAdd)
         {
             ILiteCollection<User> col = liteDb.GetCollection<User>();
                 var user = new User

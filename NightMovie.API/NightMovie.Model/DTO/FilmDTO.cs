@@ -1,7 +1,4 @@
-﻿using LiteDB;
-using NightMovie.API.Model;
-
-namespace NightMovie.API.DTO
+﻿namespace NightMovie.Model.DTO
 {
     public class FilmDTO
     {

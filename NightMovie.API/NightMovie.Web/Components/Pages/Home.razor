@@ -1,78 +1,36 @@
-﻿@page "/home"
-@using Microsoft.AspNetCore.Components
+﻿@page "/"
+@inherits LayoutComponentBase
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>NightMovie</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 {
-            margin: 0;
-        }
-        .search-bar {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        .grid div {
-            width: 100%;
-            padding-top: 100%;
-            position: relative;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .footer button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>NIGHTMOVIE</h1>
-            <input type="text" placeholder="Rechercher" class="search-bar" />
+<div class="search-bar">
+    <input type="text" placeholder="Rechercher" @bind="searchQuery" />
+</div>
+
+<div class="movies-grid">
+    @foreach (var movie in movies)
+    {
+        <div class="movie-poster">
+            <img src="@movie.PosterUrl" alt="@movie.Title" />
         </div>
-        <div class="grid">
-            @for (int i = 0; i < 16; i++)
-            {
-                <div></div>
-            }
-        </div>
-        <div class="footer">
-            <button>AJOUTER UN FILM</button>
-            <button>SESSIONS</button>
-            <button>Filtres</button>
-        </div>
-    </div>
-</body>
-</html>
+    }
+</div>
+
+@code {
+    private string searchQuery = string.Empty;
+    private List<Movie> movies = new List<Movie>
+    {
+        new Movie { Title = "Movie 1", PosterUrl = "url1.jpg" },
+        new Movie { Title = "Movie 2", PosterUrl = "url2.jpg" },
+        // Ajoutez d'autres films ici
+    };
+
+    private void SearchMovies()
+    {
+        // Logique de recherche de films
+    }
+
+    public class Movie
+    {
+        public string Title { get; set; }
+        public string PosterUrl { get; set; }
+    }
+}
