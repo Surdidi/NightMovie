@@ -1,0 +1,29 @@
+﻿.card-footer .card {
+    transition: background-color 0.3s ease;
+    border: none;
+    border-radius: 0;
+    height: 100%;
+}
+
+    .card-footer .card:hover {
+        background-color: #e0bbff;
+        cursor: pointer;
+    }
+
+.card-footer {
+    display: flex;
+    padding: 0;
+}
+
+    .card-footer .card .card-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+.main {
+    flex: 1;
+    overflow-x: hidden;
+    height: 90vh;
+}
+

@@ -51,8 +51,8 @@ namespace NightMovie.API.ApiControllers
         }
 
 
-        [HttpPost]
-        /*public void CreateUserTmp(LoginOrCreateDTO userToAdd)
+        /*[HttpPost]
+        public void CreateUserTmp(LoginOrCreateDTO userToAdd)
         {
             ILiteCollection<User> col = liteDb.GetCollection<User>();
                 var user = new User

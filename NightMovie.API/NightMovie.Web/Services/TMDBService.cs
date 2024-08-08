@@ -18,7 +18,7 @@ namespace NightMovie.API.Services
 
         public async Task<Movie> GetMovieAsync(int tmdbId)
         {
-            var url = $"{baseUrl}{tmdbId}?api_key={apiKey}";
+            var url = $"{baseUrl}{tmdbId}?api_key={apiKey}&language=fr-FR";
             var response = await _httpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)

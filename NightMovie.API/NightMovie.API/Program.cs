@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add services to the container.
 
 builder.Services.AddCors(options => options
@@ -74,6 +76,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 app.Use(async (context, next) =>
 {
     if (context.Request.Method == "OPTIONS")

@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\NightMovie\NightMovie.ServiceDefaults\NightMovie.ServiceDefaults.csproj" />
     <ProjectReference Include="..\NightMovie.Model\NightMovie.Model.csproj" />
   </ItemGroup>
 

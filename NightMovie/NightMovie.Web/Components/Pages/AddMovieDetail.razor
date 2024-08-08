@@ -1,0 +1,83 @@
+﻿@page "/AddMovieDetail/{TmdbId}"
+@using BlazorBootstrap
+@using NightMovie.API.Model
+@using NightMovie.Model.DTO
+@using NightMovie.Web.Models
+@rendermode InteractiveServer
+@inject TMDBClient tmdbClient
+@inject NightMovieApiClient nightMovieApiClient
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+
+<PageTitle>Ajouter un fim : detail</PageTitle>
+
+<div class="no-hover-effect">
+    <div class="container mt-5">
+        <div class="row">
+            <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            <center>
+                                <h2>@movie.title</h2>
+                            </center>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardBody>
+                        <img src="@($"https://image.tmdb.org/t/p/w500{movie.poster_path}")" alt="@movie.title" class="img-fluid mb-3 mx-auto d-block"/>
+                        <p>@movie.overview</p>
+                        <div class="form-group">
+                            <label for="categorySelect">Select Category</label>
+                            <InputSelect id="categorySelect" @bind-Value="SelectedCategory" class="form-control">
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@category.Id">@category.Nom</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="d-grid gap-2 col-6 mx-auto mt-2">
+                        <button class="btn btn-primary" @onclick="HandleValidSubmit">Ajouter un film</button>
+                        </div>
+                    </CardBody>
+                </Card>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string TmdbId { get; set; }
+
+    private MovieDetail movie = new MovieDetail();
+    private IEnumerable<Categorie> categories = new List<Categorie>();
+    private int SelectedCategory { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movie = await tmdbClient.GetMovieAsync(TmdbId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await GetCategorieAsync();
+        SelectedCategory = categories.FirstOrDefault()?.Id ?? 0;
+    }
+
+
+    private async Task GetCategorieAsync()
+    {
+        categories = await nightMovieApiClient.GetCategories();
+        StateHasChanged();
+    }
+    private async Task HandleValidSubmit()
+    {
+        if(SelectedCategory == 0)
+        {
+            return;
+        }
+        FilmDTO film = new FilmDTO();
+        film.Nom = movie.title;
+        film.IdCategorie = SelectedCategory;
+        film.TmdbId = TmdbId;
+        await nightMovieApiClient.AddFilm(film);
+    }
+}

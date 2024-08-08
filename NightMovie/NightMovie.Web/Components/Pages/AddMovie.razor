@@ -1,0 +1,63 @@
+﻿@page "/AddMovie"
+@using NightMovie.Web.Models
+@inject TMDBClient tmdbClient;
+@rendermode InteractiveServer
+@using BlazorBootstrap
+@inject NavigationManager navigationManager
+
+<PageTitle>Ajouter un film</PageTitle>
+
+<h3>Ajouter un film</h3>
+
+    <div class="container mt-5">
+        <div class="row">
+            <input type="text" @oninput="SearchItems" placeholder="Search..." />
+            @if (loading)
+            {
+                <div Class="rounded mx-auto d-block">
+                    <p><em><Spinner /></em></p>
+                </div>
+            }
+
+            else
+            {
+                @foreach (var item in items)
+                {
+                    <div class="container mt-4">
+
+                            <div class="row">
+                              <center>
+                                <div class="col-md-4">
+                                    <a href="@($"AddMovieDetail/{item.Id}")" class="text-decoration-none">
+                                        <div class="card">
+                                            <img src="@($"https://image.tmdb.org/t/p/w500{item.poster_path}")" alt="@item.Title" style="width: 150px; height: 150px;" Class="rounded mx-auto d-block" />
+                                            <div class="card-body">
+                                                <h5 class="card-title text-dark">@item.Title</h5>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </center>
+                          </div>
+                    </div>
+                }
+            }
+    </div>
+</div>
+
+@code {
+    private bool loading = false;
+    private List<Movie> items = new List<Movie>();
+
+    private async Task SearchItems(ChangeEventArgs args)
+    {
+        var searchTerm = args.Value.ToString();
+        if(searchTerm.Length > 2)
+        {
+            items.Clear();
+            loading = true;
+            items = await tmdbClient.SearchMovieByNameAsync(searchTerm);
+            loading = false;
+        }
+    }
+}

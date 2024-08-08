@@ -114,7 +114,7 @@ namespace NightMovie.API.ApiControllers
                 {
                     _seanceService.GenerateFilm(idSeance);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     seances.Delete(idSeance);
                     throw;
