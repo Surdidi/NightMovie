@@ -1,14 +1,9 @@
-﻿using LiteDB;
-using SQLite;
-using SQLiteNetExtensions.Attributes;
-using System.Text.Json.Serialization;
-
+﻿using System.Text.Json.Serialization;
 namespace NightMovie.API.Model
 {
-    [Table("User")]
     public class User
     {
-        public int Id { get; set; }
+        public int ID { get; set; }
         public string UserName { get; set; }
         [JsonIgnore]
         public string password { get; set; }

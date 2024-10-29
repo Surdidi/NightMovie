@@ -1,10 +1,14 @@
-using LiteDB;
 using Microsoft.IdentityModel.Tokens;
 using NightMovie.API.Service.AuthentificationService;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Cors;
+using NightMovie.API.Database;
+using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,11 +28,34 @@ builder.Services.AddCors(options => options.AddPolicy("ApiCorsPolicy", builder =
     builder.WithOrigins("http://192.168.1.44:8100", "http://88.172.131.125:17004").AllowAnyMethod().AllowAnyHeader();
 }));
 
-builder.Services.AddSingleton<ILiteDatabase>(new LiteDatabase("Data/NightMovieBdd.db"));
+//builder.Services.AddSingleton<ILiteDatabase>(new LiteDatabase("Data/NightMovieBdd.db"));
 builder.Services.AddSingleton<IAuthentificationService, AuthenficationService>();
-builder.Services.AddSingleton<ISeanceService, SeanceService>();
 
-string strKey = builder.Configuration.GetValue<string>("Authentification:SignatureKey") ?? throw new InvalidOperationException();
+var connection =  Environment.GetEnvironmentVariable("NightMovieDBConnectionString");
+
+
+
+builder.Services.AddDbContext<NightMovieContext>(options =>
+options.UseSqlServer(connection));
+builder.Services.AddScoped<ISeanceService, SeanceService>();
+
+
+using (var sp = builder.Services.BuildServiceProvider())
+{
+    try
+    {
+        var context = sp.GetRequiredService<NightMovieContext>();
+        var auth = sp.GetRequiredService<IAuthentificationService>();
+        NightMovieDBInitializer.Initialize(context, auth);
+    }
+    catch (Exception ex)
+    {
+        var logger = sp.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred creating the DB.");
+    }
+}
+
+string strKey = builder.Configuration.GetValue<string>("Authentification_SignatureKey") ?? throw new InvalidOperationException();
 var TokenValidationParameters = new TokenValidationParameters
 {
     ValidIssuer = "nightMovie.API",

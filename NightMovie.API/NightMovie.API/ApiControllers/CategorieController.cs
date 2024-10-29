@@ -1,8 +1,8 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NightMovie.API.Database;
 using NightMovie.API.Model;
+using System.Data.Entity;
 
 namespace NightMovie.API.ApiControllers
 {
@@ -12,39 +12,36 @@ namespace NightMovie.API.ApiControllers
     public class CategorieController : ControllerBase
     {
 
-        private readonly ILiteDatabase liteDb;
 
         private readonly ILogger<CategorieController> _logger;
+        private NightMovieContext _nightMovieContext;
 
-        public CategorieController(ILogger<CategorieController> logger, ILiteDatabase liteDb)
+        public CategorieController(ILogger<CategorieController> logger, NightMovieContext nightMovieContext)
         {
             _logger = logger;
-            this.liteDb = liteDb;
+            _nightMovieContext = nightMovieContext;
         }
 
         // GET: api/<FilmController>
         [HttpPost("/api/Categorie/Films")]
         public IEnumerable<Film> FilmsByCategories([FromBody] List<int> ids)
         {
-            ILiteCollection<Film> categories = liteDb.GetCollection<Film>();
-            var listCategories = categories.Find(x => ids.Contains(x.Categorie.Id));
-
+            var listCategories = _nightMovieContext.Films.Where(x => ids.Contains(x.Categorie.ID));
             return listCategories;
         }
 
         [HttpPost("/api/Categorie")]
         public void Post(Categorie categorie)
         {
-            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
-            categories.Upsert(categorie);
+            _nightMovieContext.Categories.Update(categorie);
+            _nightMovieContext.SaveChanges();
         }
 
 
         [HttpGet("/api/Categorie")]
         public IEnumerable<Categorie> Categories()
         {
-            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
-            return categories.FindAll();
+            return _nightMovieContext.Categories.Include(c => c.Films).ToList();
         }
     }
 

@@ -1,23 +1,12 @@
-﻿using LiteDB;
-using SQLite;
-using SQLiteNetExtensions.Attributes;
-
-namespace NightMovie.API.Model
+﻿namespace NightMovie.API.Model
 {
-    [Table("Film")]
     public class Film
     {
-        public int Id { get; set; }
+        public int ID { get; set; }
         public string? Nom { get; set; }
         public string? TmdbId { get; set; }
-
-        [BsonRef("Categorie")]
-        public Categorie? Categorie { get; set; }
-
-        [BsonRef("User")]
-        public User? User { get; set; }
-        public List<Vote>? Votes { get; set; }
-
-        public Seance? Seance { get; set; }
+        public Categorie Categorie { get; set; }
+        public virtual User? User { get; set; }
+        public virtual Seance? Seance { get; set; }
     }
 }

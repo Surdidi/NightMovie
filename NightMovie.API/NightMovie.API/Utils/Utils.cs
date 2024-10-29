@@ -1,6 +1,4 @@
-﻿using LiteDB;
-using NightMovie.API.Model;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 
 namespace NightMovie.API.Utils
 {

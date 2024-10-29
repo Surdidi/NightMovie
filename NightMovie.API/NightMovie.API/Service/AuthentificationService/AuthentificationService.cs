@@ -38,6 +38,7 @@ namespace NightMovie.API.Service.AuthentificationService
 
         public void ComparePassword(User user, string? password)
         {
+            if (user == null) throw new UnauthorizedAccessException();
             /* Extract the bytes */
             byte[] hashBytes = Convert.FromBase64String(user.password ?? throw new UnauthorizedAccessException());
             /* Get the salt */
@@ -55,16 +56,16 @@ namespace NightMovie.API.Service.AuthentificationService
                 }
             }
         }
-
+        
         public string GenerateJsonWebToken(User user)
         {
             var Claims = new List<Claim>
             {
-                new Claim("userId",user.Id.ToString()),
+                new Claim("userId",user.ID.ToString()),
                 new Claim("isAdmin",user.IsAdmin.ToString().ToUpper())
             };
 
-            var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Authentification:SignatureKey"]));
+            var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Authentification_SignatureKey"]));
 
             var Token = new JwtSecurityToken(
                 "nightMovie.API",

@@ -1,10 +1,8 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.Model.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
+using NightMovie.API.Database;
 
 namespace NightMovie.API.ApiControllers
 {
@@ -13,40 +11,39 @@ namespace NightMovie.API.ApiControllers
     [Authorize]
     public class AccountController : ControllerBase
     {
-        private readonly ILiteDatabase liteDb;
 
         private readonly ILogger<AccountController> _logger;
         private IAuthentificationService authenficationService;
+        private NightMovieContext _dbContext;
 
-        public AccountController(ILogger<AccountController> logger, ILiteDatabase liteDb, IAuthentificationService authentificationService)
+        public AccountController(ILogger<AccountController> logger, NightMovieContext dbContext, IAuthentificationService authentificationService)
         {
             _logger = logger;
-            this.liteDb = liteDb;
+            this._dbContext = dbContext;
             this.authenficationService = authentificationService;
         }
 
         [HttpPost]
         public void ChangePassword([FromBody] string password)
         {
-            ILiteCollection<User> col = liteDb.GetCollection<User>();
 
             string userId = Utils.Utils.GetPayloadFromToken(HttpContext, "userId");
-            var userRequest = col.Find(x => x.Id == Int32.Parse(userId)).First();
+            var userRequest = _dbContext.Users.Find(Int32.Parse(userId));
             userRequest.password = authenficationService.HashPassword(password);
-            col.Upsert(userRequest);
+            _dbContext.Users.Update(userRequest);
+            _dbContext.SaveChanges();
         }
 
         [HttpGet("{id}")]
         public User Get(int id)
         {
-            ILiteCollection<User> col = liteDb.GetCollection<User>();
-            return col.FindById(id);
+            return _dbContext.Users.Find(id);
         }
 
         [HttpGet]
         public IEnumerable<User> GetAll()
         {
-            return liteDb.GetCollection<User>().FindAll();
+            return _dbContext.Users;
         }
     }
 }

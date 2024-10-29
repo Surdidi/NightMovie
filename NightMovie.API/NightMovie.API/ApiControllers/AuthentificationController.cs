@@ -1,11 +1,9 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.Model.DTO;
+using NightMovie.API.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
-using System.Xml.Linq;
+using NightMovie.API.Database;
 
 namespace NightMovie.API.ApiControllers
 {
@@ -13,15 +11,14 @@ namespace NightMovie.API.ApiControllers
     [ApiController]
     public class AuthentificationController : ControllerBase
     {
-        private readonly ILiteDatabase liteDb;
-
+        private NightMovieContext _nightMovieContext { get; set; }
         private readonly ILogger<AuthentificationController> _logger;
         private IAuthentificationService authenficationService;
 
-        public AuthentificationController(ILogger<AuthentificationController> logger, ILiteDatabase liteDb, IAuthentificationService authentificationService)
+        public AuthentificationController(ILogger<AuthentificationController> logger, IAuthentificationService authentificationService, NightMovieContext nightMovieContext)
         {
             _logger = logger;
-            this.liteDb = liteDb;
+            _nightMovieContext = nightMovieContext;
             this.authenficationService = authentificationService;
         }
 
@@ -30,11 +27,11 @@ namespace NightMovie.API.ApiControllers
         [EnableCors("ApiCorsPolicy")]
         public string Login([FromBody] LoginOrCreateDTO login)
         {
-            ILiteCollection<User> col = liteDb.GetCollection<User>();
-            var user = col.Find(x => x.UserName.ToUpper() == login.Username.ToUpper()).First();
+            var user = _nightMovieContext.Users.Where(x => x.UserName.ToUpper() == login.Username.ToUpper()).FirstOrDefault();
             authenficationService.ComparePassword(user, login.Password);
-            return authenficationService.GenerateJsonWebToken(user);
-        }        
-        
+            var tmp = authenficationService.GenerateJsonWebToken(user);
+            return tmp;
+        }
+
     }
 }

@@ -26,10 +26,11 @@
             return new AuthenticationState(user);
         }
 
-        public void NotifyUserAuthentication(string token)
+        public async Task NotifyUserAuthentication(string token)
         {
             var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "User") }, "jwt");
             var user = new ClaimsPrincipal(identity);
+            await _localStorageService.SetItemAsync<string>("authToken",token);
         }
 
         public void NotifyUserLogout()
@@ -47,19 +48,19 @@
         {
             var token = await GetToken();
             if (string.IsNullOrEmpty(token))
-                return false;
+                return true;
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
             if (!tokenHandler.CanReadToken(token))
-                return false;
+                return true;
 
             var jwtToken = tokenHandler.ReadJwtToken(token);
 
             // Check the expiration claim
             var expClaim = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "exp");
             if (expClaim == null)
-                return false;
+                return true;
 
             // Get the expiration time in Unix format
             var expUnix = long.Parse(expClaim.Value);

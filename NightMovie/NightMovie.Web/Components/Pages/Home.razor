@@ -1,21 +1,117 @@
 ﻿@page "/"
+@using NightMovie.API.DTO
+@using NightMovie.Web.Models
 @inject AuthService auth
 @inject NavigationManager navigationManager
+@inject NightMovieApiClient nightMovieApiClient
+@inject TMDBClient tmdbClient
+@rendermode InteractiveServer
+
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (logged == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (logged == false)
+{
+    <EditForm FormName="LoginForm" Model="@loginModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-Welcome to your new app.
+        <div class="mb-3">
+            <label for="pseudo" class="form-label">Pseudo</label>
+            <InputText id="pseudo" class="form-control" @bind-Value="loginModel.Username" />
+            <ValidationMessage For="@(() => loginModel.Username)" />
+        </div>
 
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+    </EditForm>
+}
+else
+{
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Rechercher" @bind="searchQuery" @oninput="FilterMovies" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            @foreach (var movie in filteredMovies)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
+                    <div class="card">
+                        <img src="@($"https://image.tmdb.org/t/p/w500{movie.poster_path}")" class="card-img-top img-fluid" alt="@movie.title">
+                        <div class="card-body">
+                            <h5 class="card-title">@movie.title</h5>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
 @code{
+    private bool? logged = null;
+    private string searchQuery = string.Empty;
+    private List<MovieDetail> movies = new List<MovieDetail>();
+    private List<MovieDetail> filteredMovies = new List<MovieDetail>();
+    private LoginOrCreateDTO loginModel = new LoginOrCreateDTO();
 
+    private async Task HandleValidSubmit()
+    {
+        await nightMovieApiClient.Login(loginModel);
+        logged = true;
+        var films = await nightMovieApiClient.GetMovies();
+        var tmdbIds = films.Select(x => x.TmdbId).ToList();
+        movies = await tmdbClient.GetMoviesAsync(tmdbIds!);
+        filteredMovies = movies;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+
+    }
+
+    private void FilterMovies()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            filteredMovies = movies;
+        }
+        else
+        {
+            filteredMovies = movies.Where(m => m.title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (await auth.IsTokenExpired()!)
+        if(firstRender)
         {
-            navigationManager.NavigateTo("/Login");
+            if (await auth.IsTokenExpired())
+            {
+                logged = false;
+                StateHasChanged();
+            }
+            else
+            {
+                logged = true;
+                var films = await nightMovieApiClient.GetMovies();
+                var tmdbIds = films.Select(x => x.TmdbId).ToList();
+                movies = await tmdbClient.GetMoviesAsync(tmdbIds!);
+                filteredMovies = movies;
+                StateHasChanged();
+            }
         }
     }
 }

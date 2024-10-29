@@ -1,33 +1,29 @@
 ﻿using NightMovie.API.Model;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using LiteDB;
 using NightMovie.API.Utils;
+using NightMovie.API.Database;
 
 namespace NightMovie.API.Service.AuthentificationService
 {
     public class SeanceService : ISeanceService
     {
         private readonly IConfiguration Configuration;
-        private readonly ILiteDatabase liteDb;
+        private NightMovieContext _nightMovieContext;
 
-
-        public SeanceService(IConfiguration configuration, ILiteDatabase liteDb)
+        public SeanceService(IConfiguration configuration, NightMovieContext nightMovieContext)
         {
             Configuration = configuration;
-            this.liteDb = liteDb;
-
+            _nightMovieContext = nightMovieContext;
         }
 
-        public static User GetRandomUserByWeight(IList<User> users, Categorie categorie)
+        public User GetRandomUserByWeight(IList<User> users, Categorie categorie)
         {
             Random _rand = new Random();
 
             //Check that user have add film in this categorie
-            var userPossible = users.Where(u => categorie.Films.Where(f => f.User.Id == u.Id).Count() > 0);
+            var userPossible = users
+            .Where(user => _nightMovieContext.Films
+                .Any(film => film.User.ID == user.ID && film.Categorie.ID == categorie.ID && film.Seance.ID == null))
+            .ToList();
 
             // Calculez la somme totale des poids
             float totalWeight = userPossible.Sum(u => u.Weight);
@@ -48,22 +44,18 @@ namespace NightMovie.API.Service.AuthentificationService
 
         public Film GetRandomFilm(int id)
         {
-            //Get information database
-            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
-            ILiteCollection<Seance> seances = liteDb.GetCollection<Seance>();
-
             //retrieve seance
-            var seance = seances.FindById(id);
+            var seance = _nightMovieContext.Seances.Find(id);
 
             //Get categorie
-            var minValue = categories.Find(x => x.Films != null).Min(a => a.nbPicked);
-            var categoriesPossible = categories.Find(x => x.nbPicked == minValue && x.Films.Where(f => f.Seance == null).Count() > 0);
-            if(categoriesPossible.Count() == 0)
+            var minValue = _nightMovieContext.Categories.Where(x => x.Films != null).Min(a => a.nbPicked);
+            var categoriesPossible = _nightMovieContext.Categories.Where(x => x.nbPicked == minValue && x.Films.Where(f => f.Seance == null).Count() > 0);
+            if (categoriesPossible.Count() == 0)
             {
                 throw new Exception("Il n'y a plus de film à proposer pour cette séance.");
             }
             var categorie = categoriesPossible.RandomElement();
-            
+
 
             //Get user
             bool verif = true;
@@ -71,22 +63,23 @@ namespace NightMovie.API.Service.AuthentificationService
 
 
             //Verify that user have add film in this categorie
-            IEnumerable<Film> filmTmp = categorie.Films.Where(film => seance.Users.Count(user => user.Id == film.User.Id) > 0);
-            selectedUser = GetRandomUserByWeight(seance.Users.ToList(),categorie);
+            IEnumerable<Film> filmTmp = categorie.Films.Where(film => seance.Users.Count(user => user.ID == film.User.ID) > 0);
+            selectedUser = GetRandomUserByWeight(seance.Users.ToList(), categorie);
 
             //Get film
-            Film film = categorie.Films.Where(x => x.User.Id == selectedUser.Id && x.Seance == null).RandomElement();
+            Film film = categorie.Films.Where(x => x.User.ID == selectedUser.ID && x.Seance == null).RandomElement();
+            _nightMovieContext.SaveChanges();
             return film;
         }
 
         public Film GenerateFilm(int idSeance)
         {
-            ILiteCollection<Seance> seances = liteDb.GetCollection<Seance>();
-            var seance = seances.FindById(idSeance);
+            var seance = _nightMovieContext.Seances.Find(idSeance);
             var film = GetRandomFilm(idSeance);
             seance.Film = film;
             seance.Categorie = film.Categorie;
-            seances.Update(seance);
+            _nightMovieContext.Seances.Update(seance);
+            _nightMovieContext.SaveChanges();
             return film;
         }
 

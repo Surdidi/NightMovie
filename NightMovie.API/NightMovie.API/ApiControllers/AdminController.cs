@@ -1,8 +1,7 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.Model.DTO;
+using NightMovie.API.Database;
+using NightMovie.API.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
 
@@ -14,25 +13,23 @@ namespace NightMovie.API.ApiControllers
     public class AdminController : ControllerBase
     {
 
-        private readonly ILiteDatabase liteDb;
 
         private readonly ILogger<AdminController> _logger;
         private IAuthentificationService authenficationService;
+        private NightMovieContext _nightMovieContext;
 
-        public AdminController(ILogger<AdminController> logger, ILiteDatabase liteDb, IAuthentificationService authentificationService)
+        public AdminController(ILogger<AdminController> logger, IAuthentificationService authentificationService, NightMovieContext nightMovieContext)
         {
             _logger = logger;
-            this.liteDb = liteDb;
             this.authenficationService = authentificationService;
+            _nightMovieContext = nightMovieContext;
         }
 
         [HttpPost]
         public void CreateUser(LoginOrCreateDTO userToAdd)
         {
-            ILiteCollection<User> col = liteDb.GetCollection<User>();
-
             string userId = Utils.Utils.GetPayloadFromToken(HttpContext, "userId");
-            var userRequest = col.Find(x => x.Id == Int32.Parse(userId)).First();
+            var userRequest = _nightMovieContext.Users.Find(userId);
             if (userRequest.IsAdmin)
             {
                 var user = new User
@@ -41,7 +38,8 @@ namespace NightMovie.API.ApiControllers
                     password = authenficationService.HashPassword(userToAdd.Password),
                     IsAdmin = false
                 };
-                col.Upsert(user);
+                _nightMovieContext.Users.Add(user);
+                _nightMovieContext.SaveChanges();
             }
             else
             {
@@ -67,13 +65,12 @@ namespace NightMovie.API.ApiControllers
         [HttpPost]
         public void DeleteUser([FromBody] int id)
         {
-            ILiteCollection<User> col = liteDb.GetCollection<User>();
-
             string userId = Utils.Utils.GetPayloadFromToken(HttpContext, "userId");
-            var userRequest = col.Find(x => x.Id == Int32.Parse(userId)).First();
+            var userRequest = _nightMovieContext.Users.Find(userId);
             if (userRequest.IsAdmin)
             {
-                col.Delete(id);
+                _nightMovieContext.Users.Remove(_nightMovieContext.Users.Find(id));
+                _nightMovieContext.SaveChanges();
             }
             else
             {

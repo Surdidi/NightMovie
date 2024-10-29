@@ -2,15 +2,16 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Forms
 @using System.ComponentModel.DataAnnotations
-@using NightMovie.Model.DTO
+@using NightMovie.API.DTO
 @inject NightMovieApiClient NightMovieApiClient
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager navigationManager
 
 <PageTitle>Login</PageTitle>
 
 <h3>Login</h3>
 
-<EditForm Model="@loginModel" OnValidSubmit="HandleValidSubmit">
+<EditForm FormName="LoginForm" Model="@loginModel" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -35,6 +36,7 @@
     private async Task HandleValidSubmit()
     {
         await NightMovieApiClient.Login(loginModel);
+        navigationManager.NavigateTo("/");
     }
 
     

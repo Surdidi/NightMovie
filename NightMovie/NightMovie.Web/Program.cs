@@ -1,11 +1,7 @@
 using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using NightMovie.Web;
 using NightMovie.Web.Components;
 using NightMovie.Web.Services;
-using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 

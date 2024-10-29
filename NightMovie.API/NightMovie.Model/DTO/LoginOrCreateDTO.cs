@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NightMovie.Model.DTO
+namespace NightMovie.API.DTO
 {
     public class LoginOrCreateDTO
     {

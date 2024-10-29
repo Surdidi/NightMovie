@@ -1,5 +1,5 @@
 ﻿
-namespace NightMovie.Model.DTO
+namespace NightMovie.API.DTO
 {
     public class UserDTO
     {

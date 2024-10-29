@@ -1,11 +1,8 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NightMovie.Model.DTO;
 using NightMovie.API.Model;
 using NightMovie.API.Service.AuthentificationService;
-using NightMovie.API.Utils;
+using NightMovie.API.Database;
 
 namespace NightMovie.API.ApiControllers
 {
@@ -14,24 +11,21 @@ namespace NightMovie.API.ApiControllers
     [Authorize]
     public class SeanceController : ControllerBase
     {
-
-        private readonly ILiteDatabase liteDb;
-
         private readonly ILogger<SeanceController> _logger;
         private ISeanceService _seanceService;
+        private NightMovieContext _nightMovieContext;
 
-        public SeanceController(ILogger<SeanceController> logger, ILiteDatabase liteDb, ISeanceService seanceService)
+        public SeanceController(ILogger<SeanceController> logger, ISeanceService seanceService, NightMovieContext context)
         {
             _logger = logger;
-            this.liteDb = liteDb;
             _seanceService = seanceService;
+            _nightMovieContext = context;
         }
 
         [HttpGet]
         public IEnumerable<Seance> List()
         {
-            ILiteCollection<Seance> col = liteDb.GetCollection<Seance>();
-            return col.FindAll().OrderByDescending(x => x.IsOngoing);
+            return _nightMovieContext.Seances.OrderByDescending(x => x.IsOngoing);
         }
 
         [HttpGet("{id}")]
@@ -40,18 +34,15 @@ namespace NightMovie.API.ApiControllers
             string isAdmin = Utils.Utils.GetPayloadFromToken(HttpContext, "isAdmin");
             if (isAdmin == "TRUE")
             {
-                ILiteCollection<Seance> col = liteDb.GetCollection<Seance>();
-                return col.FindById(id);
+                return _nightMovieContext.Seances.Find(id);
             }
             else
             {
-                ILiteCollection<Seance> col = liteDb.GetCollection<Seance>();
-
                 return new Seance
                 {
-                    Users = col.FindById(id).Users,
-                    IsOngoing = true,
-                    Id = col.FindById(id).Id
+                    Users = _nightMovieContext.Seances.Find(id).Users,
+                    IsOngoing = _nightMovieContext.Seances.Find(id).IsOngoing,
+                    ID = _nightMovieContext.Seances.Find(id).ID
                 };
             }
         }
@@ -59,9 +50,10 @@ namespace NightMovie.API.ApiControllers
         [HttpDelete]
         public void DeleteSeance(int idSeance)
         {
-            ILiteCollection<Seance> seances = liteDb.GetCollection<Seance>();
-            seances.FindById(idSeance).Film.Seance = null;
-            seances.Delete(idSeance);
+            var seance = _nightMovieContext.Seances.Find(idSeance);
+            _nightMovieContext.Films.Find(seance.FilmID).Seance = null;
+            _nightMovieContext.Seances.Remove(seance);
+            _nightMovieContext.SaveChanges();
         }
 
         /*
@@ -96,12 +88,9 @@ namespace NightMovie.API.ApiControllers
 
             try
             {
-                ILiteCollection<Seance> seances = liteDb.GetCollection<Seance>();
-                ILiteCollection<User> usersCol = liteDb.GetCollection<User>();
+                var userRequest = _nightMovieContext.Users.Where(x => users.Where(u => u.ID == x.ID).Count() > 0).ToList();
 
-                var userRequest = usersCol.Find(x => users.Where(u => u.Id == x.Id).Count() > 0).ToList();
-
-                if (seances.Exists(x => x.IsOngoing == true))
+                if (_nightMovieContext.Seances.Any(x => x.IsOngoing == true))
                 {
                     return StatusCode(403, new { message = "Une séance est déjà en cours, cloturez là avant d'en lancer une nouvelle." });
                 }
@@ -109,14 +98,14 @@ namespace NightMovie.API.ApiControllers
                 {
                     Users = userRequest
                 };
-                var idSeance = seances.Insert(seanceToAdd);
+                var idSeance = _nightMovieContext.Seances.Add(seanceToAdd);
                 try
                 {
-                    _seanceService.GenerateFilm(idSeance);
+                    _seanceService.GenerateFilm(seanceToAdd.ID);
                 }
                 catch (Exception)
                 {
-                    seances.Delete(idSeance);
+                    _nightMovieContext.Seances.Remove(seanceToAdd);
                     throw;
                 }
                 return Ok();
@@ -132,34 +121,29 @@ namespace NightMovie.API.ApiControllers
         public IActionResult CloseSeance(int id)
         {
 
-            //init collections
-            ILiteCollection<Seance> seances = liteDb.GetCollection<Seance>();
-            ILiteCollection<Film> films = liteDb.GetCollection<Film>();
-            ILiteCollection<Categorie> categories = liteDb.GetCollection<Categorie>();
-            ILiteCollection<User> users = liteDb.GetCollection<User>();
-
             //Get seance
-            var seance = seances.FindById(id);
+            var seance = _nightMovieContext.Seances.Find(id);
 
             //Update Film
-            var film = films.FindById(seance.Film.Id);
+            var film = _nightMovieContext.Films.Find(seance.Film.ID);
             film.Seance = seance;
-            films.Update(film);
+            _nightMovieContext.Films.Update(film);
 
             //Update categorie
-            var categorie = categories.FindById(seance.Categorie.Id);
-            categorie.Films.Find(x => x.Id == film.Id).Seance = seance;
+            var categorie = _nightMovieContext.Categories.Find(seance.Categorie.ID);
             categorie.nbPicked++;
-            categories.Update(categorie);
+            _nightMovieContext.Categories.Update(categorie);
 
             //Update user
-            var user = users.FindById(film.User.Id);
+            var user = _nightMovieContext.Users.Find(film.User.ID);
             user.Weight = user.Weight * 0.8f;
 
             //Update Seance
             seance.IsOngoing = false;
-            seances.Update(seance);
-            
+            _nightMovieContext.Seances.Update(seance);
+
+            _nightMovieContext.SaveChanges();
+
             return new OkObjectResult(seance);
         }
 

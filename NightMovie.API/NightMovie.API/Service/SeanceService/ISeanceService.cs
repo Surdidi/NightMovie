@@ -1,6 +1,4 @@
-﻿using LiteDB;
-using NightMovie.API.Model;
-using System.Security.Cryptography;
+﻿using NightMovie.API.Model;
 
 namespace NightMovie.API.Service.AuthentificationService
 {
